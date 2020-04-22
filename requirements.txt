@@ -1,0 +1,10 @@
+pandas
+numpy
+scipy
+statsmodels
+matplotlib
+fnn
+pykalman
+seaborn
+tqdm
+python_version=='3.6.6'
