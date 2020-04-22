@@ -464,7 +464,7 @@ class BaseTradeEngine(object):
         param_dict = {}
         for key in default:
             param_dict[key] = [default[key]]
-
+        
         #Set the parameter ranges
         param_dict[v1_name] = v1_values
         if(v2_values is not None):
@@ -474,17 +474,16 @@ class BaseTradeEngine(object):
         cols = list(param_dict.keys())
         cols.extend(['perf'])
         benchmark_output = pd.DataFrame(columns = cols)
-
+        
         #Process for the value combinations
         for p in tqdm(list(product(*param_dict.values()))):
             
             a = {}
-            for i,key in enumerate(default.keys()):
+            for i,key in enumerate(param_dict.keys()):
                 a[key] = p[i]
-
+            
             self.process(train_rng = train_rng, **a)
             trade_record = self.record
-            a['outliers'] = p[len(default)-1]
             a['perf'] = ffn.PerformanceStats(trade_record['cum rets'], rf = 0.0016)
             
             benchmark_output = benchmark_output.append(a, ignore_index=True)

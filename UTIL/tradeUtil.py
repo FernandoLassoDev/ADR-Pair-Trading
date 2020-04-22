@@ -39,9 +39,9 @@ def backtest_model(odr, adr, engineClass, settings, treatment,  values, order, v
                    clean_version = 'treatment', bid = 'bid', ask = 'ask', train = [0,0.75], test = [0.75,1]):
 
     
-    print('------------------------------------------')
-    print(odr + ' vs ' + adr + ' pair trading using ' + version)
-    print('------------------------------------------')
+    print('-----------------------------------------------------------------------')
+    print(odr + ' vs ' + adr + ' pair trading using ' + version + ' and treatment ' + clean_version)
+    print('-----------------------------------------------------------------------')
     
     # Read prices
     x = pd.read_csv('STATICS/PRICE/'+odr+'.csv', index_col = 'date' )
