@@ -54,7 +54,7 @@ def backtest_model(odr, adr, engineClass, settings, treatment,  values, order, v
     
     treatment.pop('is_cleaned', 0)
     x, y = BaseTradeEngine.clean_data(x, y, 'last', **treatment)
-    print(('After applying filters  | '+adr+' : {a} , '+odr+' : {o} ').format(a = len(a), o = len(b)))
+    print(('After applying filters  | '+adr+' : {a} , '+odr+' : {o} ').format(a = len(x), o = len(y)))
      
     engine  = engineClass(x, y, 'last', bid, ask, is_cleaned = True, **settings)
 
