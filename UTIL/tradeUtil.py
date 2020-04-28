@@ -5,10 +5,11 @@ from STRATEGY.BaseTradeEngine import BaseTradeEngine
 from matplotlib.backends.backend_pdf import PdfPages
 import matplotlib.pyplot as plt
 import copy
+from copy import deepcopy
 
 # Search through a range of settings by optimizing over a pair of two parameters at a time
 def optimize_parameters_heuristic(engine, settings, values, order, description = None,
-                    stat = 'daily_sharpe', maximize = True, train_rng = [0,0.6]):
+                    stat = 'daily_sharpe', maximize = True, train_rng = [0,0.75]):
     # Save figure outputs
     figs = []
     
@@ -19,7 +20,7 @@ def optimize_parameters_heuristic(engine, settings, values, order, description =
         
         # Plot the sharpe ratio for the given value combinations
         v1_opt, v2_opt, _, fig = engine.plot_param_search(
-            settings, v1, values[v1], v2, values[v2], stat, maximize, train_rng)
+            settings, v1, values[v1], v2, values[v2], stat, maximize, deepcopy(train_rng))
         
         figs = figs + [fig]
         
@@ -59,9 +60,10 @@ def backtest_model(odr, adr, engineClass, settings, treatment,  values, order, v
     engine  = engineClass(x, y, 'last', bid, ask, is_cleaned = True, **settings)
 
     d = odr + '_' + adr + '_' + version + '_' + clean_version 
-    settings_opt = optimize_parameters_heuristic(engine, copy.deepcopy(settings), values, order, description = d)
+    settings_opt = optimize_parameters_heuristic(engine, copy.deepcopy(settings), 
+                                                 values, order, description = d, train_rng= train)
     
-    print(settings_opt)
+    #print(settings_opt)
 
     # In sample results
     engine.process(train_rng = train,**settings_opt)

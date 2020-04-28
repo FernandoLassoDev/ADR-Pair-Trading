@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import ffn
+from copy import deepcopy
 
 # Visiualization tools
 from tqdm import tqdm
@@ -14,10 +15,6 @@ class BaseTradeEngine(object):
     
     def __init__(self, *args, **kwargs):
         
-       # for arg in args:
-       #     print("arg:"+str(arg))
-       # for key,value in kwargs.items():
-       #     print("kwarg:"+key +":" +str(value))
         x = args[0]
         y = args[1]
         self.col_name = args[2]
@@ -35,7 +32,6 @@ class BaseTradeEngine(object):
         kwargs.setdefault('lag', 0)
         kwargs.setdefault('resample', 1)
         kwargs.setdefault('rounding', 3)
-        
         
         self.resample = int(kwargs['resample'])
         self.transaction_cost = kwargs['transaction_cost']
@@ -405,7 +401,7 @@ class BaseTradeEngine(object):
     def plot_signals(self, fromDate, toDate, ratio = None):
             
         d = self.record[fromDate:toDate]
-        d.index = d.index.map(str)
+        #d.index = d.index.map(str)
         
         if ratio is None:
             ratio = d.hr
@@ -415,31 +411,31 @@ class BaseTradeEngine(object):
         # Plot buy spread price
         S_buy  = d.buy_y - d.sell_x * ratio
 
+         # Plot sell spread price
+        S_sell = d.sell_y - d.buy_x * ratio
+        
         buyS =  np.nan*S_buy.copy()
         exitS = np.nan*S_buy.copy()
-
+        sellS = np.nan*S_sell.copy()
+        exitL = np.nan*S_sell.copy()
+        
         # Plot long positions enter and sell positions exit
         longentry = d.long_entry & d.transaction & (d.numUnits == 1)
         shortexit = d.short_exit & d.transaction & (d.numUnits.shift(1) == -1)
-
-        buyS[longentry] = S_buy[longentry]
-        exitS[shortexit] = S_buy[shortexit]
-
-        # Plot sell spread price
-        S_sell = d.sell_y - d.buy_x * ratio
-
-        sellS = np.nan*S_sell.copy()
-        exitL = np.nan*S_sell.copy()
-
+   
         # Plot short positions enter and long positions exit
         shortentry = d.short_entry & d.transaction & (d.numUnits == -1)
         longexit   = d.long_exit   & d.transaction & (d.numUnits.shift(1) == 1)
 
+        #Select
+        buyS[longentry] = S_buy[longentry]
+        exitS[shortexit] = S_buy[shortexit]
         sellS[shortentry] = S_sell[shortentry]
         exitL[longexit]   = S_sell[longexit]
-
+        
         S_buy.plot(color='k')
         S_sell.plot(color='b')
+        
         buyS.plot(color='g' , linestyle='None', marker='o')
         sellS.plot(color='r', linestyle='None', marker='o')
         exitL.plot(color='g', linestyle='None', marker='x')
@@ -447,7 +443,7 @@ class BaseTradeEngine(object):
 
         # Make graph
         x1,x2,y1,y2 = plt.axis()
-
+       
         plt.axis((x1,x2,S_sell.min(),S_buy.max()))
 
         plt.legend(['Buy Spread','Sell Spread', 'Enter Long', 'Enter Short', 'Exit Long', 'Exit Short'])
@@ -469,7 +465,7 @@ class BaseTradeEngine(object):
         param_dict[v1_name] = v1_values
         if(v2_values is not None):
             param_dict[v2_name] = v2_values
-
+        
         #Create output dataframe
         cols = list(param_dict.keys())
         cols.extend(['perf'])
@@ -482,10 +478,10 @@ class BaseTradeEngine(object):
             for i,key in enumerate(param_dict.keys()):
                 a[key] = p[i]
             
-            self.process(train_rng = train_rng, **a)
+            self.process(train_rng = deepcopy(train_rng), **a)
             trade_record = self.record
-            a['perf'] = ffn.PerformanceStats(trade_record['cum rets'], rf = 0.0016)
             
+            a['perf'] = ffn.PerformanceStats(trade_record['cum rets'], rf = 0.0016)
             benchmark_output = benchmark_output.append(a, ignore_index=True)
 
         return benchmark_output
