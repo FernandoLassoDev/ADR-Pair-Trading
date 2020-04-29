@@ -18,7 +18,7 @@ class Benchmark(BaseTradeEngine):
                  windowZ = 30, windowOLS = 150, train_rng = [0,1], **kwargs):
        
         minWindowOLS = int(min(max(windowOLS/np.sqrt(resample),windowZ),len(self.original_x)/2))
-        
+       
         # Calibrate OLS if necessary
         if self.windowOLS != minWindowOLS or resample != self.resample:
             self.resampling(resample)
@@ -54,7 +54,7 @@ class Benchmark(BaseTradeEngine):
         #model = RollingOLS(endog =self.y, exog=self.x,window=self.windowOLS)
         #rres = model.fit()
         #self.beta = rres.params.reshape(-1, )
-        self.windowOLS = windowOLS
+        self.windowOLS = min(windowOLS,len(self.y-1))
         
         df = pd.DataFrame({'y':self.y,'x':self.x,'c':1})
         

@@ -61,20 +61,21 @@ def backtest_model(odr, adr, engineClass, settings, treatment,  values, order, v
 
     d = odr + '_' + adr + '_' + version + '_' + clean_version 
     settings_opt = optimize_parameters_heuristic(engine, copy.deepcopy(settings), 
-                                                 values, order, description = d, train_rng= train)
+                                                 values, order, description = d, train_rng= deepcopy(train))
     
     #print(settings_opt)
 
     # In sample results
-    engine.process(train_rng = train,**settings_opt)
+    engine.process(train_rng = deepcopy(train),**settings_opt)
     #engine.plot_signals("2018-09-01","2018-10-01")
     train_results = engine.get_summary(verbose = False)
     train_results.index = [(odr + '_' + adr,'train',version,clean_version)]
     
     # Out of sample results
-    engine.process(train_rng = test,**settings_opt)
+    engine.process(train_rng = deepcopy(test),**settings_opt)
     #engine.plot_signals("2018-09-01","2018-10-01")
     test_results = engine.get_summary(verbose = False)
     test_results.index = [(odr + '_' + adr,'test',version,clean_version)]
     
     return train_results.transpose(), test_results.transpose() , settings_opt
+
