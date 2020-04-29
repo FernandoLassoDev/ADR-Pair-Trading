@@ -58,7 +58,7 @@ class Benchmark(BaseTradeEngine):
         
         df = pd.DataFrame({'y':self.y,'x':self.x,'c':1})
         
-        model = RollingOLS(endog =df['y'], exog=df[['x']],window=self.windowOLS)
+        model = RollingOLS(endog =df['y'], exog=df[['x','c']],window=self.windowOLS)
         rres = model.fit()
       
         self.beta = rres.params['x'].values.reshape(-1, )
